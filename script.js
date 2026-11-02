@@ -93,12 +93,16 @@
     const r = trilho.getBoundingClientRect();
     const horizontal = r.width > r.height;
     const lim = (horizontal ? r.width : r.height) - 2;
-    ponto.style.opacity = 1;
-    const a = ponto.animate(
-      [{ transform: 'translate(0,0)' }, { transform: horizontal ? `translateX(${lim}px)` : `translateY(${lim}px)` }],
-      { duration: 1800, delay: 200, easing: 'linear', fill: 'backwards' },
-    );
-    a.onfinish = () => { ponto.style.opacity = 0; };
+    const fim = horizontal ? `translateX(${lim}px)` : `translateY(${lim}px)`;
+    // percorre a linha, some em Receita, espera e recomeça; parado fora da tela
+    const a = ponto.animate([
+      { transform: 'translate(0,0)', opacity: 0, offset: 0 },
+      { opacity: 1, offset: .03 },
+      { transform: fim, opacity: 1, offset: .3 },
+      { transform: fim, opacity: 0, offset: .34 },
+      { transform: fim, opacity: 0, offset: 1 },
+    ], { duration: 6000, delay: 200, iterations: Infinity, easing: 'linear' });
+    new IntersectionObserver((es) => { if (es[0].isIntersecting) a.play(); else a.pause(); }).observe(trilho);
   };
   const alvos = [...$$('[data-revela], [data-abre], [data-partir], .rodape')];
   const iniciarEntradas = () => {
@@ -173,12 +177,47 @@
     linksNav.forEach((a) => { const s = $(a.getAttribute('href')); if (s) ioNav.observe(s); });
   }
 
+  /* ---------- critérios: a lista é conferida conforme a rolagem passa por ela ---------- */
+  const criterios = $$('.criterios li');
+  const lista = $('.criterios');
+  if (calmo || !lista || !('IntersectionObserver' in window)) {
+    criterios.forEach((li) => li.classList.add('is-marcado'));
+  } else {
+    // conta pela linha de leitura (58% da tela), não por cruzamento: rolagem rápida e âncora não deixam item para trás
+    let pedido = 0;
+    const conferir = () => {
+      pedido = 0;
+      const linha = innerHeight * .58;
+      let atual = -1;
+      criterios.forEach((li, k) => { if (li.getBoundingClientRect().top < linha) atual = k; });
+      criterios.forEach((li, k) => {
+        li.classList.toggle('is-marcado', k <= atual);
+        li.classList.toggle('is-aqui', k === atual && li.getBoundingClientRect().bottom > innerHeight * .2);
+      });
+    };
+    const aoRolarLista = () => { if (!pedido) pedido = requestAnimationFrame(conferir); };
+    new IntersectionObserver((es) => {
+      if (es[0].isIntersecting) { addEventListener('scroll', aoRolarLista, { passive: true }); conferir(); }
+      else removeEventListener('scroll', aoRolarLista);
+    }).observe(lista);
+  }
+
   /* ---------- as ondas da marca: feixe de linhas que liga as três palavras da subheadline ---------- */
   $$('[data-ondas]').forEach((cv) => {
     const g = cv.getContext('2d');
     if (!g) return;
     const fundo = cv.closest('[data-hero-fundo]');
     const elos = fundo ? $$('[data-elo]', fundo) : [];
+    const claro = cv.dataset.ondas === 'claro';
+    // a camada acompanha de leve o ponteiro: o feixe parece estar atrás do texto
+    const seguir = Boolean(fundo) && !calmo && matchMedia('(hover: hover) and (pointer: fine)').matches;
+    let alvoX = 0; let alvoY = 0; let posX = 0; let posY = 0;
+    if (seguir) {
+      addEventListener('pointermove', (e) => {
+        alvoX = (e.clientX / innerWidth - .5) * -18;
+        alvoY = (e.clientY / innerHeight - .5) * -12;
+      }, { passive: true });
+    }
     let w = 0; let h = 0; let vis = true; let raf = 0; let ultimo = 0; let t = 1.2; let estreito = false;
     const medir = () => {
       const d = Math.min(devicePixelRatio || 1, 1.5);
@@ -190,10 +229,12 @@
     const linha = (n, f, fase = 0, abre = 1) => {
       const base = h * (estreito ? .95 : .78);
       const sobe = -n * n * h * (estreito ? .05 : .5);
+      // a faixa dá voltas: onde o cosseno zera, as linhas se cruzam e ela parece uma fita no espaço
+      const volta = .3 + .7 * Math.cos(n * 4.4 - t * .55 + fase);
       return base + sobe + fase * 40
         + Math.sin(n * 3.1 + t + f * 1.5 + fase) * (estreito ? 8 + f * 14 : 20 + f * 70)
         + Math.sin(n * 7.2 - t * .7 + f * 3.2 + fase) * (estreito ? 3 : 6 + f * 20)
-        + (f - .5) * (estreito ? 30 : 190) * abre * (.2 + n);
+        + (f - .5) * (estreito ? 44 : 260) * abre * (.2 + n) * volta;
     };
     const feixe = (qtd, tinta, largura, fase, abre) => {
       g.strokeStyle = tinta; g.lineWidth = largura;
@@ -214,8 +255,13 @@
     };
     const desenhar = () => {
       g.clearRect(0, 0, w, h);
+      if (claro) {
+        feixe(estreito ? 12 : 26, degrade('255,255,255', .03, .16, .24), 1, 0, 1);
+        return;
+      }
       if (!estreito) feixe(30, degrade('203,107,240', .02, .13, .2), 1, 1.1, 1.5); // camada de trás, mais aberta
       feixe(estreito ? 20 : 56, degrade('165,36,212', .1, .6, .85), estreito ? 1 : .9, 0, 1);
+      if (!estreito) feixe(9, degrade('236,190,255', .04, .3, .5), 1, 0, .34); // miolo claro, na frente
       elos.forEach((e) => {
         const n = Number(e.dataset.elo);
         e.style.transform = `translate(calc(${(n * w).toFixed(1)}px - 50%), ${linha(n, .5).toFixed(1)}px)`;
@@ -224,7 +270,14 @@
     const quadro = (agora) => {
       raf = 0;
       if (!vis || document.hidden) return;
-      if (agora - ultimo > 40) { t += (agora - ultimo) * .00016; ultimo = agora; desenhar(); }
+      if (agora - ultimo > 40) {
+        if (seguir) {
+          const k = Math.min(1, (agora - ultimo) * .004);
+          posX += (alvoX - posX) * k; posY += (alvoY - posY) * k;
+          fundo.style.transform = `translate3d(${posX.toFixed(1)}px, ${posY.toFixed(1)}px, 0)`;
+        }
+        t += (agora - ultimo) * .00016; ultimo = agora; desenhar();
+      }
       raf = requestAnimationFrame(quadro);
     };
     const ligar = () => { if (!calmo && !raf && vis && !document.hidden) { ultimo = performance.now(); raf = requestAnimationFrame(quadro); } };
@@ -396,7 +449,10 @@
     avancar.hidden = n === 3;
     enviar.hidden = n !== 3;
     progresso.style.setProperty('--andou', String((n - 1) / 2));
-    rotulos.forEach((l, i) => l.classList.toggle('is-atual', i === n - 1));
+    rotulos.forEach((l, i) => {
+      l.classList.toggle('is-atual', i === n - 1);
+      l.classList.toggle('is-feito', i < n - 1);
+    });
     textoPasso.textContent = `Etapa ${n} de 3. Todos os campos são obrigatórios.`;
     if (comFoco) {
       const r = painel.getBoundingClientRect();

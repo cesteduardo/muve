@@ -128,7 +128,7 @@
   </section>
 
   <!-- 02 PROBLEMA -->
-  <section class="folha problema" id="problema">
+  <section class="folha pontos problema" id="problema">
     <div class="caixa">
       <div class="cabeca">
         <h2 data-partir>Você investe em marketing. <span class="tom">Mas sabe exatamente o que está gerando crescimento?</span></h2>
@@ -196,6 +196,7 @@
   <section class="folha folha--funda metodo" id="metodo">
     <div class="caixa">
       <div class="metodo__topo" data-abre>
+        <canvas class="ondas" data-ondas="claro" aria-hidden="true"></canvas>
         <p class="rotulo">MÉTODO PULSE | MUV.E</p>
         <p class="metodo__nome" aria-hidden="true" data-revela><span><b style="--n:0">P</b></span><span><b style="--n:1">U</b></span><span><b style="--n:2">L</b></span><span><b style="--n:3">S</b></span><span><b style="--n:4">E</b></span></p>
         <div class="metodo__texto">
@@ -237,7 +238,7 @@
   </section>
 
   <!-- 05 PARA QUEM -->
-  <section class="folha quem" id="para-quem">
+  <section class="folha pontos quem" id="para-quem">
     <div class="caixa quem__grade">
       <div class="quem__esq">
         <h2 data-partir>Para operações médicas que já têm estrutura e querem dar o próximo passo.</h2>
@@ -262,17 +263,17 @@
   <!-- 06 FUNDADOR -->
   <section class="folha fundador" id="fundador">
     <div class="caixa fundador__grade">
-      <figure class="fundador__foto fundador__foto--provisoria" data-abre>
-        <!-- FOTO DO FARLEN: troque o arquivo e o alt desta imagem quando a foto real chegar (proporção 4:5). -->
-        <img src="assets/img/fundador-provisorio.webp" alt="Monograma da Muv.e, no lugar reservado à fotografia de Farlen Berri" width="1000" height="1000" loading="lazy" decoding="async">
+      <figure class="fundador__cartao">
+        <div class="fundador__foto fundador__foto--provisoria" data-abre>
+          <!-- FOTO DO FARLEN: troque o arquivo e o alt desta imagem quando a foto real chegar (proporção 4:5). -->
+          <img src="assets/img/fundador-provisorio.webp" alt="Monograma da Muv.e, no lugar reservado à fotografia de Farlen Berri" width="1000" height="1000" loading="lazy" decoding="async">
+        </div>
+        <figcaption class="fundador__nome"><strong>Farlen Berri</strong><span>Fundador da Muv.e | Estrategista de Marketing e Aquisição</span></figcaption>
       </figure>
       <div class="fundador__texto">
         <p class="rotulo" data-revela>QUEM ESTÁ POR TRÁS DA MUV.E</p>
         <h2 data-partir style="--i:1">Por trás de cada estratégia, existe uma forma de pensar.</h2>
-        <div class="fundador__nome" data-revela style="--i:2">
-          <p><strong>Farlen Berri</strong><br>Fundador da Muv.e | Estrategista de Marketing e Aquisição</p>
-        </div>
-        <div class="fundador__bio" data-revela style="--i:3">
+        <div class="fundador__bio" data-revela style="--i:2">
           <p>Sou formado em Marketing e atuo com estratégia, posicionamento, mídia paga e desenvolvimento de negócios.</p>
           <p>Ao longo da minha trajetória, percebi que muitas empresas investem em marketing sem compreender o que realmente está limitando seu crescimento.</p>
           <p>Foi a partir dessa visão que desenvolvi a Muv.e.</p>
@@ -298,7 +299,6 @@
       <div class="painel" data-revela style="--i:2">
         <form class="form" id="form-diagnostico" novalidate data-form>
           <div class="progresso" data-progresso aria-hidden="true">
-            <div class="progresso__trilho"><span class="progresso__ponto" data-progresso-ponto></span></div>
             <ol class="progresso__rotulos"><li>Contato</li><li>Clínica</li><li>Operação</li></ol>
           </div>
           <p class="form__aviso" data-passo-texto>Etapa 1 de 3. Todos os campos são obrigatórios.</p>
