@@ -353,6 +353,43 @@
     el.addEventListener('blur', () => { el.value = el.value.trim(); });
   });
 
+  /* segmentos: rádios de verdade (setas, Tab e leitor de tela nativos); a pílula só acompanha a escolha */
+  $$('[data-segmento]', form).forEach((seg) => {
+    const trilho = $('[data-segmento-trilho]', seg);
+    const pilula = $('.segmento__pilula', seg);
+    const radios = $$('input[type=radio]', seg);
+    const bordas = () => {
+      const resto = trilho.scrollWidth - trilho.clientWidth - trilho.scrollLeft;
+      trilho.toggleAttribute('data-fade-start', trilho.scrollLeft > 1);
+      trilho.toggleAttribute('data-fade-end', resto > 1);
+    };
+    let primeira = true;
+    const posicionar = (rolar) => {
+      const marcado = radios.find((r) => r.checked);
+      seg.classList.toggle('is-escolhido', Boolean(marcado));
+      if (!marcado) return;
+      const op = marcado.closest('.segmento__op');
+      // na primeira escolha a pílula nasce no lugar, sem viajar desde a ponta
+      if (primeira) seg.classList.remove('is-pronto');
+      pilula.style.setProperty('--x', `${op.offsetLeft}px`);
+      pilula.style.setProperty('--w', `${op.offsetWidth}px`);
+      if (primeira) { void pilula.offsetWidth; seg.classList.add('is-pronto'); primeira = false; }
+      // a opção escolhida fica inteira à vista, com folga para não cair no esmaecido
+      if (rolar && trilho.scrollWidth > trilho.clientWidth) {
+        const folga = 24;
+        const ini = op.offsetLeft - folga;
+        const fim = op.offsetLeft + op.offsetWidth + folga - trilho.clientWidth;
+        const alvo = trilho.scrollLeft > ini ? ini : trilho.scrollLeft < fim ? fim : trilho.scrollLeft;
+        if (alvo !== trilho.scrollLeft) trilho.scrollTo({ left: Math.max(0, alvo), behavior: calmo ? 'auto' : 'smooth' });
+      }
+    };
+    radios.forEach((r) => r.addEventListener('change', () => posicionar(true)));
+    trilho.addEventListener('scroll', bordas, { passive: true });
+    // o passo 3 nasce escondido: mede de novo quando aparece e quando a largura muda
+    if ('ResizeObserver' in window) new ResizeObserver(() => { bordas(); posicionar(false); }).observe(trilho);
+    bordas();
+  });
+
   // especialidade "Outra"
   const blocoOutra = $('[data-outra]', form);
   c('especialidade').addEventListener('change', () => {

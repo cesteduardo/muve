@@ -90,7 +90,8 @@
 <header class="topo" id="topo" data-topo>
   <div class="ilha">
     <a class="ilha__marca" href="#hero" aria-label="Muv.e, voltar ao início">
-      <img src="assets/img/muve-negativa.svg" alt="Muv.e" width="107" height="22">
+      <img class="ilha__logo ilha__logo--neg" src="assets/img/muve-negativa.svg" alt="Muv.e" width="107" height="22">
+      <img class="ilha__logo ilha__logo--pos" src="assets/img/muve-principal.svg" alt="" width="107" height="22" aria-hidden="true">
     </a>
     <nav class="ilha__nav" aria-label="Seções da página">
       <a href="#metodo">Método PULSE</a>
@@ -312,12 +313,12 @@
           <fieldset class="passo" data-passo="1">
             <legend class="sr">Seus dados de contato</legend>
             <div class="campo">
-              <label for="f-nome">Nome completo <span class="obrig" aria-hidden="true">*</span></label>
+              <label for="f-nome">Nome completo&nbsp;<span class="obrig" aria-hidden="true">*</span></label>
               <input id="f-nome" name="nome" type="text" autocomplete="name" autocapitalize="words" maxlength="80" required aria-required="true" aria-describedby="e-nome">
               <p class="erro" id="e-nome" data-erro></p>
             </div>
             <div class="campo">
-              <label for="f-whats">WhatsApp <span class="obrig" aria-hidden="true">*</span></label>
+              <label for="f-whats">WhatsApp&nbsp;<span class="obrig" aria-hidden="true">*</span></label>
               <input id="f-whats" name="whatsapp" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="(00) 00000-0000" maxlength="15" required aria-required="true" aria-describedby="e-whats">
               <p class="erro" id="e-whats" data-erro></p>
             </div>
@@ -326,12 +327,12 @@
           <fieldset class="passo" data-passo="2">
             <legend class="sr">Sua clínica</legend>
             <div class="campo">
-              <label for="f-clinica">Nome da clínica ou consultório <span class="obrig" aria-hidden="true">*</span></label>
+              <label for="f-clinica">Nome da clínica ou consultório&nbsp;<span class="obrig" aria-hidden="true">*</span></label>
               <input id="f-clinica" name="clinica" type="text" autocomplete="organization" maxlength="100" required aria-required="true" aria-describedby="e-clinica">
               <p class="erro" id="e-clinica" data-erro></p>
             </div>
             <div class="campo">
-              <label for="f-espec">Especialidade médica <span class="obrig" aria-hidden="true">*</span></label>
+              <label for="f-espec">Especialidade médica&nbsp;<span class="obrig" aria-hidden="true">*</span></label>
               <select id="f-espec" name="especialidade" required aria-required="true" aria-describedby="e-espec">
                 <option value="">Selecione</option>
                 <option>Cardiologia</option>
@@ -349,18 +350,18 @@
               <p class="erro" id="e-espec" data-erro></p>
             </div>
             <div class="campo" data-outra hidden>
-              <label for="f-outra">Qual especialidade? <span class="obrig" aria-hidden="true">*</span></label>
+              <label for="f-outra">Qual especialidade?&nbsp;<span class="obrig" aria-hidden="true">*</span></label>
               <input id="f-outra" name="especialidade_outra" type="text" maxlength="60" aria-describedby="e-outra">
               <p class="erro" id="e-outra" data-erro></p>
             </div>
             <div class="campo-duplo">
               <div class="campo">
-                <label for="f-cidade">Cidade <span class="obrig" aria-hidden="true">*</span></label>
+                <label for="f-cidade">Cidade&nbsp;<span class="obrig" aria-hidden="true">*</span></label>
                 <input id="f-cidade" name="cidade" type="text" autocomplete="address-level2" maxlength="60" required aria-required="true" aria-describedby="e-cidade">
                 <p class="erro" id="e-cidade" data-erro></p>
               </div>
               <div class="campo">
-                <label for="f-uf">Estado <span class="obrig" aria-hidden="true">*</span></label>
+                <label for="f-uf">Estado&nbsp;<span class="obrig" aria-hidden="true">*</span></label>
                 <select id="f-uf" name="uf" autocomplete="address-level1" required aria-required="true" aria-describedby="e-uf">
                   <option value="">UF</option>
                   <option>AC</option><option>AL</option><option>AM</option><option>AP</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MG</option><option>MS</option><option>MT</option><option>PA</option><option>PB</option><option>PE</option><option>PI</option><option>PR</option><option>RJ</option><option>RN</option><option>RO</option><option>RR</option><option>RS</option><option>SC</option><option>SE</option><option>SP</option><option>TO</option>
@@ -373,27 +374,33 @@
           <fieldset class="passo" data-passo="3">
             <legend class="sr">Sua operação</legend>
             <fieldset class="grupo" data-grupo="modelo" aria-describedby="e-modelo">
-              <legend>Modelo de atendimento <span class="obrig" aria-hidden="true">*</span></legend>
-              <div class="opcoes opcoes--linha">
-                <label class="opcao"><input type="radio" name="modelo" value="Particular"><span>Particular</span></label>
-                <label class="opcao"><input type="radio" name="modelo" value="Convênio"><span>Convênio</span></label>
-                <label class="opcao"><input type="radio" name="modelo" value="Particular e convênio"><span>Particular e convênio</span></label>
+              <legend>Modelo de atendimento&nbsp;<span class="obrig" aria-hidden="true">*</span></legend>
+              <div class="segmento segmento--cabe" data-segmento>
+                <div class="segmento__trilho" data-segmento-trilho>
+                  <span class="segmento__pilula" aria-hidden="true"></span>
+                  <label class="segmento__op"><input type="radio" name="modelo" value="Particular"><span>Particular</span></label>
+                  <label class="segmento__op"><input type="radio" name="modelo" value="Convênio"><span>Convênio</span></label>
+                  <label class="segmento__op"><input type="radio" name="modelo" value="Particular e convênio"><span>Particular e convênio</span></label>
+                </div>
               </div>
               <p class="erro" id="e-modelo" data-erro></p>
             </fieldset>
             <fieldset class="grupo" data-grupo="investimento" aria-describedby="e-invest">
-              <legend>Investimento mensal atual em marketing <span class="obrig" aria-hidden="true">*</span></legend>
-              <div class="opcoes opcoes--linha">
-                <label class="opcao"><input type="radio" name="investimento" value="Ainda não invisto"><span>Ainda não invisto</span></label>
-                <label class="opcao"><input type="radio" name="investimento" value="Até R$ 2.000"><span>Até R$ 2.000</span></label>
-                <label class="opcao"><input type="radio" name="investimento" value="R$ 2.001 a R$ 5.000"><span>R$ 2.001 a R$ 5.000</span></label>
-                <label class="opcao"><input type="radio" name="investimento" value="R$ 5.001 a R$ 10.000"><span>R$ 5.001 a R$ 10.000</span></label>
-                <label class="opcao"><input type="radio" name="investimento" value="Acima de R$ 10.000"><span>Acima de R$ 10.000</span></label>
+              <legend>Investimento mensal atual em marketing&nbsp;<span class="obrig" aria-hidden="true">*</span></legend>
+              <div class="segmento" data-segmento>
+                <div class="segmento__trilho" data-segmento-trilho>
+                  <span class="segmento__pilula" aria-hidden="true"></span>
+                  <label class="segmento__op"><input type="radio" name="investimento" value="Ainda não invisto"><span>Ainda não invisto</span></label>
+                  <label class="segmento__op"><input type="radio" name="investimento" value="Até R$ 2.000"><span>Até R$ 2.000</span></label>
+                  <label class="segmento__op"><input type="radio" name="investimento" value="R$ 2.001 a R$ 5.000"><span>R$ 2.001 a R$ 5.000</span></label>
+                  <label class="segmento__op"><input type="radio" name="investimento" value="R$ 5.001 a R$ 10.000"><span>R$ 5.001 a R$ 10.000</span></label>
+                  <label class="segmento__op"><input type="radio" name="investimento" value="Acima de R$ 10.000"><span>Acima de R$ 10.000</span></label>
+                </div>
               </div>
               <p class="erro" id="e-invest" data-erro></p>
             </fieldset>
             <fieldset class="grupo" data-grupo="desafio" aria-describedby="e-desafio">
-              <legend>Principal desafio atual <span class="obrig" aria-hidden="true">*</span></legend>
+              <legend>Principal desafio atual&nbsp;<span class="obrig" aria-hidden="true">*</span></legend>
               <div class="opcoes">
                 <label class="opcao"><input type="radio" name="desafio" value="Atrair novos pacientes"><span>Atrair novos pacientes</span></label>
                 <label class="opcao"><input type="radio" name="desafio" value="Atrair pacientes particulares"><span>Atrair pacientes particulares</span></label>
@@ -428,21 +435,32 @@
 </main>
 
 <footer class="rodape">
-  <img class="rodape__logo" src="assets/img/muve-assinatura-principal.svg" alt="Muv.e, Estratégia de Aquisição e Crescimento" width="381" height="51" loading="lazy" decoding="async">
-  <p class="rodape__lema">
-    <span>Estratégia antes da mídia.</span>
-    <span>Negócio antes da métrica.</span>
-    <span>Crescimento antes do clique.</span>
-  </p>
-  <ul class="rodape__contato">
-    <li>Instagram: {{PREENCHER_INSTAGRAM}}</li>
-    <li>E-mail: {{PREENCHER_EMAIL_COMERCIAL}}</li>
-  </ul>
+  <div class="rodape__topo">
+    <div class="rodape__marca">
+      <img class="rodape__logo" src="assets/img/muve-assinatura-principal.svg" alt="Muv.e, Estratégia de Aquisição e Crescimento" width="381" height="51" loading="lazy" decoding="async">
+      <p class="rodape__lema">
+        <span>Estratégia antes da mídia.</span>
+        <span>Negócio antes da métrica.</span>
+        <span>Crescimento antes do clique.</span>
+      </p>
+    </div>
+    <div class="rodape__colunas">
+      <nav class="rodape__links" aria-label="Rodapé">
+        <a href="#metodo">Método PULSE</a>
+        <a href="#para-quem">Para quem</a>
+        <a href="#fundador">Fundador</a>
+        <a href="#diagnostico" data-cta="rodape">Solicitar diagnóstico</a>
+      </nav>
+      <ul class="rodape__contato">
+        <li>Instagram: {{PREENCHER_INSTAGRAM}}</li>
+        <li>E-mail: {{PREENCHER_EMAIL_COMERCIAL}}</li>
+      </ul>
+    </div>
+  </div>
   <div class="rodape__base">
-    <span>{{PREENCHER_RAZAO_SOCIAL}} · CNPJ {{PREENCHER_CNPJ}}</span>
-    <span>© <span data-ano>2026</span> Muv.e. Todos os direitos reservados.</span>
-    <span><a href="politica-de-privacidade.html">Política de Privacidade</a><button class="rodape__cookies" type="button" data-cookies-abrir hidden>Preferências de cookies</button></span>
+    <p class="rodape__direitos"><span>© <span data-ano>2026</span> Muv.e. Todos os direitos reservados.</span> <span>{{PREENCHER_RAZAO_SOCIAL}} · CNPJ {{PREENCHER_CNPJ}}</span></p>
     <a class="credito" href="https://grbrands.com.br" target="_blank" rel="noopener">Desenvolvido por <svg class="gr-ico" viewBox="22.5 22 84 84" aria-hidden="true" focusable="false"><clipPath id="gr-ct"><rect x="-60" y="-60" width="220" height="107"/></clipPath><clipPath id="gr-cb"><rect x="-60" y="53" width="220" height="160"/></clipPath><g transform="translate(25.3 24) scale(1.00125) translate(-16 -8.2)"><g fill="currentColor" transform="rotate(-22 50 50)"><g clip-path="url(#gr-ct)"><circle cx="60" cy="50" r="38"/></g><g clip-path="url(#gr-cb)"><circle cx="50" cy="50" r="38"/></g></g></g></svg><strong>GR Brands<span>.</span></strong></a>
+    <p class="rodape__legal"><a href="politica-de-privacidade.html">Política de Privacidade</a><button class="rodape__cookies" type="button" data-cookies-abrir hidden>Preferências de cookies</button></p>
   </div>
 </footer>
 
