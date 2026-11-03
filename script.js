@@ -42,8 +42,8 @@
     raiz.childNodes.forEach((no) => {
       const cl = no.nodeType === 1 ? no : null;
       (no.textContent.match(/\S+/g) || []).forEach((p) => {
+        // span comum (não inline-block): a linha animada tem a mesma altura da linha de texto normal
         const s = document.createElement('span');
-        s.style.display = 'inline-block';
         if (cl) { const c2 = cl.cloneNode(false); c2.textContent = p; s.appendChild(c2); } else s.textContent = p;
         pecas.push(s);
       });
@@ -116,7 +116,19 @@
       const ioFim = new IntersectionObserver((es) => es.forEach((e) => {
         if (e.isIntersecting) { entrar(e.target); ioFim.unobserve(e.target); }
       }), { threshold: 0 });
-      alvos.filter((el) => !el.hasAttribute('data-ja')).forEach((el) => (el.matches('.rodape') ? ioFim : io).observe(el));
+      const pendentes = new Set(alvos.filter((el) => !el.hasAttribute('data-ja')));
+      pendentes.forEach((el) => (el.matches('.rodape') ? ioFim : io).observe(el));
+      const varrer = () => {
+        pendentes.forEach((el) => {
+          if (el.classList.contains('is-in')) { pendentes.delete(el); return; }
+          const r = el.getBoundingClientRect();
+          // sem caixa (display: none) ou acima da dobra: entra sem esperar o observador
+          if ((r.width === 0 && r.height === 0) || r.top < innerHeight * 0.9) { entrar(el); io.unobserve(el); ioFim.unobserve(el); pendentes.delete(el); }
+        });
+      };
+      let espera = 0;
+      addEventListener('scroll', () => { clearTimeout(espera); espera = setTimeout(varrer, 90); }, { passive: true });
+      addEventListener('resize', () => { clearTimeout(espera); espera = setTimeout(varrer, 160); }, { passive: true });
     } else {
       alvos.forEach((el) => el.classList.add('is-in'));
     }
@@ -151,20 +163,13 @@
 
   /* ---------- ilha ---------- */
   const topo = $('[data-topo]');
-  const ilha = topo && $('.ilha', topo);
-  const medirIlha = () => {
-    if (!ilha) return;
-    const kids = Array.from(ilha.children).filter((k) => getComputedStyle(k).display !== 'none');
-    const cs = getComputedStyle(ilha);
-    let soma = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
-    kids.forEach((k) => { soma += k.getBoundingClientRect().width; });
-    // respiro entre as peças: maior quando há links no meio
-    ilha.style.setProperty('--ilha', `${Math.ceil(soma + (kids.length - 1) * (kids.length > 2 ? 32 : 18))}px`);
+  // a pílula tem largura fixa: ao rolar só ganha uma sombra mais funda, sem medir nem animar largura
+  let ilhaAtiva = null;
+  const aoRolarIlha = () => {
+    const ativa = scrollY > 24;
+    if (topo && ativa !== ilhaAtiva) { ilhaAtiva = ativa; topo.classList.toggle('is-ilha', ativa); }
   };
-  const aoRolarIlha = () => topo && topo.classList.toggle('is-ilha', scrollY > 60);
-  medirIlha(); aoRolarIlha();
-  addEventListener('resize', medirIlha, { passive: true });
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(medirIlha);
+  aoRolarIlha();
   addEventListener('scroll', aoRolarIlha, { passive: true });
 
   // link da seção atual aceso
@@ -650,6 +655,11 @@
       if (b.dataset.cookies === 'aceitar') carregarRastreio();
     }));
   }
+
+  /* ---------- dado ainda não preenchido não aparece para o visitante ---------- */
+  $$('[data-preencher]').forEach((el) => {
+    if (/\{\{/.test(el.textContent + (el.getAttribute('href') || ''))) el.hidden = true;
+  });
 
   /* ---------- ano do rodapé ---------- */
   const ano = $('[data-ano]');
