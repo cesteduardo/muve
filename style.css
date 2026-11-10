@@ -50,6 +50,9 @@
   --ease-io: cubic-bezier(.77, 0, .175, 1);
   --mola: linear(0, .22 7%, .58 15%, .88 24%, 1.03 33%, 1.05 40%, 1.02 50%, 1 62%, .997 76%, 1);
   --t-revela: 680ms;
+  /* largura da caixa e escala do texto: crescem só nas telas grandes do Mac (ver o fim do arquivo) */
+  --largura: 1440px;
+  --k: 1;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -73,7 +76,7 @@ h2 { font-size: clamp(29px, 3.3vw, 48px); line-height: 1.12; font-weight: 500; l
 h3 { font-size: clamp(19px, 1.45vw, 21px); line-height: 1.25; font-weight: 500; letter-spacing: -.02em; }
 .tom { color: var(--tom-claro); }
 .folha--escura .tom, .folha--funda .tom { color: var(--tom-esc); }
-.caixa { width: 100%; max-width: 1440px; margin-inline: auto; padding-inline: var(--borda); }
+.caixa { width: 100%; max-width: var(--largura); margin-inline: auto; padding-inline: var(--borda); }
 .texto-grande { font-size: clamp(17px, 1.25vw, 18px); line-height: 1.6; }
 .rotulo { justify-self: start; width: fit-content; padding: 5px 12px; border-radius: 999px; background: rgba(165, 36, 212, .07); box-shadow: inset 0 0 0 1px rgba(165, 36, 212, .2); font-family: var(--titulo); font-weight: 500; font-size: 12px; line-height: 1.4; letter-spacing: .07em; color: var(--magenta); }
 .rotulo--claro { color: var(--magenta-claro); }
@@ -377,7 +380,7 @@ h3 { font-size: clamp(19px, 1.45vw, 21px); line-height: 1.25; font-weight: 500; 
 
 /* ---------- rodapé (modelo Quillery): marca à esquerda, links à direita, linha de base com crédito em chip ---------- */
 .rodape { position: relative; margin-top: calc(var(--folha) * -1); padding: clamp(40px, 4vw, 56px) var(--borda) calc(18px + env(safe-area-inset-bottom)); border-radius: var(--folha) var(--folha) 0 0; background: var(--papel); color: var(--azul); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 -20px 44px -22px rgba(3, 8, 18, .5); }
-.rodape__topo, .rodape__base { max-width: calc(1440px - 2 * var(--borda)); margin-inline: auto; }
+.rodape__topo, .rodape__base { max-width: calc(var(--largura) - 2 * var(--borda)); margin-inline: auto; }
 .rodape__topo { display: grid; gap: 26px; }
 .rodape__logo { width: 232px; }
 .rodape__lema { margin-top: 14px; max-width: 34em; font-size: 14.5px; line-height: 1.55; color: var(--apoio-claro); }
@@ -409,8 +412,8 @@ h3 { font-size: clamp(19px, 1.45vw, 21px); line-height: 1.25; font-weight: 500; 
   .cards4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-/* ---------- tablet ---------- */
-@media (min-width: 760px) {
+/* ---------- tablet: a partir de 720, para pegar o iPad mini em pé (744 pt no GR Frames) ---------- */
+@media (min-width: 720px) {
   .topo { padding-top: 12px; }
   .ilha { width: auto; gap: 34px; padding-left: 22px; }
   .ilha__nav { display: flex; gap: 26px; font-family: var(--titulo); font-size: 14px; font-weight: 500; letter-spacing: -.01em; }
@@ -495,6 +498,102 @@ h3 { font-size: clamp(19px, 1.45vw, 21px); line-height: 1.25; font-weight: 500; 
   .hero__sub { margin-top: 14px; font-size: 16.5px; }
   .hero__acao { margin-top: 16px; }
   .hero__miolo { gap: 18px; padding-bottom: 18px; }
+}
+
+/* ============================================================
+   APARELHOS: medidas do GR Frames (o que o site vê em cada um)
+   iPhone 402×726 · deitado 874×328 · Duo 380×682, 626×764, 818×626
+   iPad mini 744×1057 · deitado 1133×668 · MacBook 1512×893
+   Mac (Studio Display) 1600×823, 2048×1075, 2560×1363
+   ============================================================ */
+
+/* entre o celular e o tablet (Duo aberto, celular grande deitado): a foto do fundador não ocupa a tela inteira */
+@media (min-width: 560px) and (max-width: 719.98px) {
+  .fundador__cartao { max-width: 420px; }
+}
+
+/* iPad mini em pé: o hero não precisa da tela inteira; a folha seguinte aparece embaixo e chama a rolagem */
+@media (min-width: 720px) and (max-width: 999.98px) and (min-height: 900px) and (orientation: portrait) {
+  .hero { min-height: calc(80svh + var(--folha)); padding-top: 110px; }
+  .hero__titulo { font-size: 58px; }
+}
+
+/* iPad mini em pé: o fundador e o formulário ficam em duas colunas, mas o cartão não fica preso alto demais */
+@media (min-width: 720px) and (max-width: 999.98px) {
+  .fundador__foto { max-height: none; }
+  /* "para quem": em 744 a coluna da esquerda ficava estreita e o botão quebrava em duas linhas */
+  .quem__grade { grid-template-columns: 1fr; }
+  .quem__esq { position: static; }
+  .quem__esq .texto-grande { max-width: 40em; }
+  .rodape__topo { grid-template-columns: 1fr; gap: 26px; }
+  .rodape__links { grid-template-columns: repeat(4, max-content); }
+}
+
+/* celular deitado (iPhone 874×328, Duo deitado baixo): pouca altura, então tudo que prende na tela solta,
+   a ilha afina e o hero cabe com o botão à vista */
+@media (orientation: landscape) and (max-height: 500px) {
+  html { scroll-padding-top: 58px; }
+  .topo { padding-top: 6px; }
+  .ilha { padding: 3px 3px 3px 16px; gap: 26px; }
+  .ilha__logo { width: 80px; }
+  .ilha__nav a { padding-block: 4px; }
+  .botao--ilha { min-height: 36px; padding: 6px 16px; font-size: 13px; }
+  .hero { min-height: calc(100svh + var(--folha)); padding-top: 62px; }
+  .hero__miolo { justify-content: center; gap: 0; padding-block: 4px 18px; }
+  .hero__titulo { font-size: clamp(28px, 4.4vw, 38px); line-height: 1.06; }
+  .hero__sub { margin-top: 12px; max-width: 46em; font-size: 15px; line-height: 1.5; }
+  .hero__acao { grid-auto-flow: column; justify-content: start; align-items: center; gap: 18px; margin-top: 14px; }
+  .hero__acao .botao { min-height: 46px; padding-block: 10px; }
+  .hero__micro { max-width: 17em; font-size: 13px; line-height: 1.35; }
+  .quem__esq, .fundador__cartao, .final__esq { position: static; }
+  .fundador__foto { max-height: none; }
+  .painel { scroll-margin-top: 58px; }
+}
+
+/* telas grandes do Mac: a caixa alarga e o texto cresce um degrau (sem zoom, que multiplica svh e vw) */
+@media (min-width: 1800px) { :root { --largura: 1600px; --k: 1.08; } }
+@media (min-width: 2200px) { :root { --largura: 1760px; --k: 1.16; } }
+@media (min-width: 1800px) {
+  body { font-size: calc(17px * var(--k)); }
+  .texto-grande, .hero__sub, .dif__texto { font-size: calc(18px * var(--k)); }
+  h2 { font-size: calc(48px * var(--k)); }
+  h3 { font-size: calc(21px * var(--k)); }
+  .hero__titulo { font-size: calc(64px * var(--k)); }
+  .hero__micro, .no p, .form__aviso, .form__lgpd, .erro, .progresso__rotulos, .pilar__num { font-size: calc(14px * var(--k)); }
+  .hero__lema { font-size: calc(14px * var(--k)); }
+  .hero__lema li { padding: calc(15px * var(--k)) calc(22px * var(--k)); }
+  .elo { font-size: calc(13px * var(--k)); }
+  .rotulo { font-size: calc(12px * var(--k)); }
+  .botao { min-height: calc(54px * var(--k)); padding-inline: calc(28px * var(--k)); font-size: calc(13.5px * var(--k)); }
+  .ilha { gap: 40px; padding-left: 26px; }
+  .ilha__logo { width: calc(100px * var(--k)); }
+  .ilha__nav { gap: 30px; font-size: calc(14px * var(--k)); }
+  .botao--ilha { min-height: calc(42px * var(--k)); padding-inline: calc(22px * var(--k)); font-size: calc(14px * var(--k)); }
+  .card { min-height: calc(330px * var(--k)); }
+  .card__num { font-size: calc(76px * var(--k)); }
+  .card p { font-size: calc(16px * var(--k)); }
+  .problema__fecho { font-size: calc(50px * var(--k)); }
+  .dif__lead { font-size: calc(22px * var(--k)); }
+  .dif__pergunta { font-size: calc(90px * var(--k)); }
+  .no h3 { font-size: calc(34px * var(--k)); }
+  .dif__fecho { font-size: calc(36px * var(--k)); }
+  .metodo__nome { font-size: calc(196px * var(--k)); }
+  .pilar h3 { font-size: calc(27px * var(--k)); }
+  .metodo__fecho { font-size: calc(28px * var(--k)); }
+  .quem__intro { font-size: calc(21px * var(--k)); }
+  .criterios li { font-size: calc(18px * var(--k)); }
+  .fundador__nome { font-size: calc(15px * var(--k)); }
+  .fundador__nome strong { font-size: calc(20px * var(--k)); }
+  .fundador__frase p:first-child { font-size: calc(27px * var(--k)); }
+  .campo label, .grupo > legend { font-size: calc(15px * var(--k)); }
+  .campo input, .campo select { min-height: calc(54px * var(--k)); font-size: calc(17px * var(--k)); }
+  .opcao span { font-size: calc(15.5px * var(--k)); }
+  .segmento__op span { font-size: calc(15px * var(--k)); }
+  .sucesso h3 { font-size: calc(32px * var(--k)); }
+  .rodape__logo { width: calc(232px * var(--k)); }
+  .rodape__lema { font-size: calc(14.5px * var(--k)); }
+  .rodape__links { font-size: calc(15.5px * var(--k)); }
+  .rodape__base, .credito { font-size: calc(13px * var(--k)); }
 }
 
 /* ---------- movimento: cada seção tem a sua coreografia; 680 ms, curva forte, pouco deslocamento ---------- */
