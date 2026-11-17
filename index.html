@@ -32,7 +32,7 @@
 
 <link rel="preload" href="assets/fonts/sora-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="style.css?v=20261116c">
+<link rel="stylesheet" href="style.css?v=20261117a">
 <script>document.documentElement.classList.add('js');setTimeout(function(){if(!window.__muveOk)document.documentElement.classList.remove('js')},4000)</script>
 
 <script type="application/ld+json">
@@ -305,10 +305,14 @@
 
       <div class="painel" data-revela style="--i:2">
         <form class="form" id="form-diagnostico" novalidate data-form>
-          <div class="progresso" data-progresso aria-hidden="true">
-            <ol class="progresso__rotulos"><li><span>Contato</span></li><li><span>Clínica</span></li><li><span>Operação</span></li></ol>
+          <div class="progresso" data-progresso>
+            <div class="progresso__topo" aria-hidden="true">
+              <p class="progresso__titulo" data-passo-titulo>Seus dados de contato</p>
+              <span class="progresso__conta" data-passo-conta>1 de 3</span>
+            </div>
+            <ol class="progresso__barras" aria-hidden="true"><li></li><li></li><li></li></ol>
+            <p class="form__aviso" data-passo-texto aria-live="polite">Etapa 1 de 3. Todos os campos são obrigatórios.</p>
           </div>
-          <p class="form__aviso" data-passo-texto>Etapa 1 de 3. Todos os campos são obrigatórios.</p>
 
           <!-- armadilha contra robôs -->
           <div class="pote" aria-hidden="true">
@@ -381,48 +385,42 @@
             <legend class="sr">Sua operação</legend>
             <fieldset class="grupo" data-grupo="modelo" aria-describedby="e-modelo">
               <legend>Modelo de atendimento&nbsp;<span class="obrig" aria-hidden="true">*</span></legend>
-              <div class="segmento segmento--cabe" data-segmento>
-                <div class="segmento__trilho" data-segmento-trilho>
-                  <span class="segmento__pilula" aria-hidden="true"></span>
-                  <label class="segmento__op"><input type="radio" name="modelo" value="Particular"><span>Particular</span></label>
-                  <label class="segmento__op"><input type="radio" name="modelo" value="Convênio"><span>Convênio</span></label>
-                  <label class="segmento__op"><input type="radio" name="modelo" value="Particular e convênio"><span>Particular e convênio</span></label>
-                </div>
+              <div class="escolhas escolhas--modelo">
+                <label class="escolha"><input type="radio" name="modelo" value="Particular"><span>Particular</span></label>
+                <label class="escolha"><input type="radio" name="modelo" value="Convênio"><span>Convênio</span></label>
+                <label class="escolha"><input type="radio" name="modelo" value="Particular e convênio"><span>Particular e convênio</span></label>
               </div>
               <p class="erro" id="e-modelo" data-erro></p>
             </fieldset>
             <fieldset class="grupo" data-grupo="investimento" aria-describedby="e-invest">
               <legend>Investimento mensal atual em marketing&nbsp;<span class="obrig" aria-hidden="true">*</span></legend>
-              <div class="segmento" data-segmento>
-                <div class="segmento__trilho" data-segmento-trilho>
-                  <span class="segmento__pilula" aria-hidden="true"></span>
-                  <label class="segmento__op"><input type="radio" name="investimento" value="Ainda não invisto"><span>Ainda não invisto</span></label>
-                  <label class="segmento__op"><input type="radio" name="investimento" value="Até R$ 2.000"><span>Até R$ 2.000</span></label>
-                  <label class="segmento__op"><input type="radio" name="investimento" value="R$ 2.001 a R$ 5.000"><span>R$ 2.001 a R$ 5.000</span></label>
-                  <label class="segmento__op"><input type="radio" name="investimento" value="R$ 5.001 a R$ 10.000"><span>R$ 5.001 a R$ 10.000</span></label>
-                  <label class="segmento__op"><input type="radio" name="investimento" value="Acima de R$ 10.000"><span>Acima de R$ 10.000</span></label>
-                </div>
+              <div class="escolhas escolhas--invest">
+                <label class="escolha"><input type="radio" name="investimento" value="Ainda não invisto"><span>Ainda não invisto</span></label>
+                <label class="escolha"><input type="radio" name="investimento" value="Até R$ 2.000"><span>Até R$&nbsp;2.000</span></label>
+                <label class="escolha"><input type="radio" name="investimento" value="R$ 2.001 a R$ 5.000"><span>R$&nbsp;2.001 a R$&nbsp;5.000</span></label>
+                <label class="escolha"><input type="radio" name="investimento" value="R$ 5.001 a R$ 10.000"><span>R$&nbsp;5.001 a R$&nbsp;10.000</span></label>
+                <label class="escolha"><input type="radio" name="investimento" value="Acima de R$ 10.000"><span>Acima de R$&nbsp;10.000</span></label>
               </div>
               <p class="erro" id="e-invest" data-erro></p>
             </fieldset>
             <fieldset class="grupo" data-grupo="desafio" aria-describedby="e-desafio">
               <legend>Principal desafio atual&nbsp;<span class="obrig" aria-hidden="true">*</span></legend>
-              <div class="opcoes">
-                <label class="opcao"><input type="radio" name="desafio" value="Atrair novos pacientes"><span>Atrair novos pacientes</span></label>
-                <label class="opcao"><input type="radio" name="desafio" value="Atrair pacientes particulares"><span>Atrair pacientes particulares</span></label>
-                <label class="opcao"><input type="radio" name="desafio" value="Melhorar a conversão dos contatos"><span>Melhorar a conversão dos contatos</span></label>
-                <label class="opcao"><input type="radio" name="desafio" value="Reduzir dependência de indicação"><span>Reduzir dependência de indicação</span></label>
-                <label class="opcao"><input type="radio" name="desafio" value="Aumentar previsibilidade"><span>Aumentar previsibilidade</span></label>
-                <label class="opcao"><input type="radio" name="desafio" value="Entender o retorno do investimento"><span>Entender o retorno do investimento</span></label>
+              <div class="escolhas escolhas--desafio">
+                <label class="escolha"><input type="radio" name="desafio" value="Atrair novos pacientes"><span>Atrair novos pacientes</span></label>
+                <label class="escolha"><input type="radio" name="desafio" value="Atrair pacientes particulares"><span>Atrair pacientes particulares</span></label>
+                <label class="escolha"><input type="radio" name="desafio" value="Melhorar a conversão dos contatos"><span>Melhorar a conversão dos contatos</span></label>
+                <label class="escolha"><input type="radio" name="desafio" value="Reduzir dependência de indicação"><span>Reduzir dependência de indicação</span></label>
+                <label class="escolha"><input type="radio" name="desafio" value="Aumentar previsibilidade"><span>Aumentar previsibilidade</span></label>
+                <label class="escolha"><input type="radio" name="desafio" value="Entender o retorno do investimento"><span>Entender o retorno do investimento</span></label>
               </div>
               <p class="erro" id="e-desafio" data-erro></p>
             </fieldset>
           </fieldset>
 
           <div class="form__acoes">
-            <button class="botao botao--voltar" type="button" data-voltar hidden>Voltar</button>
-            <button class="botao botao--largo" type="button" data-avancar>Continuar</button>
-            <button class="botao botao--largo" type="submit" data-enviar hidden>Solicitar diagnóstico estratégico</button>
+            <button class="botao botao--voltar" type="button" data-voltar hidden aria-label="Voltar para a etapa anterior"><span class="sr">Voltar</span></button>
+            <button class="botao botao--largo botao--seta" type="button" data-avancar>Continuar</button>
+            <button class="botao botao--largo botao--seta" type="submit" data-enviar hidden>Solicitar diagnóstico estratégico</button>
           </div>
           <p class="erro erro--geral" data-erro-geral role="alert"></p>
           <p class="form__lgpd">Ao enviar, você concorda com a <a href="politica-de-privacidade.html">Política de Privacidade</a>. Não informe dados clínicos ou de pacientes.</p>
@@ -472,7 +470,7 @@
   </div>
 </div>
 
-<script src="config.js?v=20261116c"></script>
-<script src="script.js?v=20261116c"></script>
+<script src="config.js?v=20261117a"></script>
+<script src="script.js?v=20261117a"></script>
 </body>
 </html>

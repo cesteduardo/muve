@@ -269,8 +269,8 @@
 
   /* ---------- seções empilhadas na rolagem (como no Warbox TV) ---------- */
   const pilha = $$('main > section');
-  const telaLarga = matchMedia('(min-width: 901px) and (min-height: 600px)');
-  if (pilha.length > 1 && !calmo && telaLarga.matches && CSS.supports('position', 'sticky')) {
+  // vale em qualquer tela, celular inclusive
+  if (pilha.length > 1 && !calmo && CSS.supports('position', 'sticky')) {
     raiz.classList.add('empilhado');
     // um marco de altura zero antes de cada seção guarda onde ela fica na página, já que a seção colada mente a própria posição
     const marcos = new Map();
@@ -278,8 +278,15 @@
       const sombra = document.createElement('span'); sombra.className = 'sombra-pilha'; sombra.setAttribute('aria-hidden', 'true'); sec.appendChild(sombra);
       const m = document.createElement('span'); m.className = 'marco-secao'; m.setAttribute('aria-hidden', 'true'); sec.before(m); marcos.set(sec, m);
     });
-    // cola cada seção quando o FIM dela chega ao pé da tela: nada fica escondido
-    const colar = () => pilha.forEach((sec) => { sec.style.top = `${Math.min(0, innerHeight - sec.offsetHeight)}px`; });
+    // cola cada seção quando o FIM dela chega ao pé da tela: nada fica escondido.
+    // A altura de referência é a menor da tela (svh): no celular a barra de endereço some e volta durante
+    // a rolagem, e medir innerHeight faria as seções pularem a cada vez
+    const sonda = document.createElement('span');
+    sonda.setAttribute('aria-hidden', 'true');
+    sonda.style.cssText = 'position:fixed;left:0;top:0;width:0;height:100vh;height:100svh;visibility:hidden;pointer-events:none';
+    document.body.appendChild(sonda);
+    const alturaFixa = () => sonda.offsetHeight || innerHeight;
+    const colar = () => { const h = alturaFixa(); pilha.forEach((sec) => { sec.style.top = `${Math.min(0, h - sec.offsetHeight)}px`; }); };
     let pedidoPilha = 0;
     const pintarPilha = () => {
       pedidoPilha = 0;
@@ -293,7 +300,12 @@
     const aoRolarPilha = () => { if (!pedidoPilha) pedidoPilha = requestAnimationFrame(pintarPilha); };
     colar(); pintarPilha();
     addEventListener('scroll', aoRolarPilha, { passive: true });
-    addEventListener('resize', () => { colar(); pintarPilha(); });
+    let larguraPilha = innerWidth;
+    addEventListener('resize', () => {
+      // só a barra de endereço mexendo: nada a recolar, só repinta
+      if (innerWidth !== larguraPilha) { larguraPilha = innerWidth; colar(); }
+      aoRolarPilha();
+    }, { passive: true });
     if ('ResizeObserver' in window) { const ro = new ResizeObserver(() => { colar(); pintarPilha(); }); pilha.forEach((sec) => ro.observe(sec)); }
     // âncoras (#metodo, #diagnostico...) vão para o lugar real da seção, mesmo que ela esteja colada lá em cima
     document.addEventListener('click', (e) => {
@@ -513,43 +525,6 @@
     el.addEventListener('blur', () => { el.value = el.value.trim(); });
   });
 
-  /* segmentos: rádios de verdade (setas, Tab e leitor de tela nativos); a pílula só acompanha a escolha */
-  $$('[data-segmento]', form).forEach((seg) => {
-    const trilho = $('[data-segmento-trilho]', seg);
-    const pilula = $('.segmento__pilula', seg);
-    const radios = $$('input[type=radio]', seg);
-    const bordas = () => {
-      const resto = trilho.scrollWidth - trilho.clientWidth - trilho.scrollLeft;
-      trilho.toggleAttribute('data-fade-start', trilho.scrollLeft > 1);
-      trilho.toggleAttribute('data-fade-end', resto > 1);
-    };
-    let primeira = true;
-    const posicionar = (rolar) => {
-      const marcado = radios.find((r) => r.checked);
-      seg.classList.toggle('is-escolhido', Boolean(marcado));
-      if (!marcado) return;
-      const op = marcado.closest('.segmento__op');
-      // na primeira escolha a pílula nasce no lugar, sem viajar desde a ponta
-      if (primeira) seg.classList.remove('is-pronto');
-      pilula.style.setProperty('--x', `${op.offsetLeft}px`);
-      pilula.style.setProperty('--w', `${op.offsetWidth}px`);
-      if (primeira) { void pilula.offsetWidth; seg.classList.add('is-pronto'); primeira = false; }
-      // a opção escolhida fica inteira à vista, com folga para não cair no esmaecido
-      if (rolar && trilho.scrollWidth > trilho.clientWidth) {
-        const folga = 24;
-        const ini = op.offsetLeft - folga;
-        const fim = op.offsetLeft + op.offsetWidth + folga - trilho.clientWidth;
-        const alvo = trilho.scrollLeft > ini ? ini : trilho.scrollLeft < fim ? fim : trilho.scrollLeft;
-        if (alvo !== trilho.scrollLeft) trilho.scrollTo({ left: Math.max(0, alvo), behavior: calmo ? 'auto' : 'smooth' });
-      }
-    };
-    radios.forEach((r) => r.addEventListener('change', () => posicionar(true)));
-    trilho.addEventListener('scroll', bordas, { passive: true });
-    // o passo 3 nasce escondido: mede de novo quando aparece e quando a largura muda
-    if ('ResizeObserver' in window) new ResizeObserver(() => { bordas(); posicionar(false); }).observe(trilho);
-    bordas();
-  });
-
   // especialidade "Outra"
   const blocoOutra = $('[data-outra]', form);
   c('especialidade').addEventListener('change', () => {
@@ -635,9 +610,11 @@
   const voltar = $('[data-voltar]', form);
   const avancar = $('[data-avancar]', form);
   const enviar = $('[data-enviar]', form);
-  const progresso = $('[data-progresso]', form);
-  const rotulos = $$('.progresso__rotulos li', form);
+  const barras = $$('.progresso__barras li', form);
   const textoPasso = $('[data-passo-texto]', form);
+  const tituloPasso = $('[data-passo-titulo]', form);
+  const contaPasso = $('[data-passo-conta]', form);
+  const titulos = blocos.map((b) => (b.querySelector(':scope > legend') || {}).textContent || '');
   const painel = $('.painel');
   const irPara = (n, comFoco) => {
     passo = n;
@@ -645,12 +622,13 @@
     voltar.hidden = n === 1;
     avancar.hidden = n === 3;
     enviar.hidden = n !== 3;
-    progresso.style.setProperty('--andou', String((n - 1) / 2));
-    rotulos.forEach((l, i) => {
+    barras.forEach((l, i) => {
       l.classList.toggle('is-atual', i === n - 1);
       l.classList.toggle('is-feito', i < n - 1);
     });
-    textoPasso.textContent = `Etapa ${n} de 3. Todos os campos são obrigatórios.`;
+    if (tituloPasso) tituloPasso.textContent = titulos[n - 1];
+    if (contaPasso) contaPasso.textContent = `${n} de 3`;
+    textoPasso.textContent = `Etapa ${n} de 3: ${titulos[n - 1]}. Todos os campos são obrigatórios.`;
     if (comFoco) {
       const r = painel.getBoundingClientRect();
       if (r.top < 70 || r.top > innerHeight * .5) painel.scrollIntoView({ block: 'start', behavior: calmo ? 'auto' : 'smooth' });
