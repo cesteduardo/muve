@@ -41,6 +41,8 @@
     const pecas = [];
     raiz.childNodes.forEach((no) => {
       const cl = no.nodeType === 1 ? no : null;
+      // a segunda frase do título (.tom) sempre começa na linha de baixo, como no texto final
+      if (cl && cl.classList.contains('tom') && pecas.length) pecas.push(document.createElement('br'));
       (no.textContent.match(/\S+/g) || []).forEach((p) => {
         // span comum (não inline-block): a linha animada tem a mesma altura da linha de texto normal
         const s = document.createElement('span');
@@ -95,14 +97,26 @@
     const lim = (horizontal ? r.width : r.height) - 2;
     const fim = horizontal ? `translateX(${lim}px)` : `translateY(${lim}px)`;
     // percorre a linha, some em Receita, espera e recomeça; parado fora da tela
+    // como o ponto do gráfico de pico: corre a linha, pousa em Receita, solta uma onda, some e recomeça
+    const tempo = { duration: 6000, delay: 200, iterations: Infinity };
     const a = ponto.animate([
-      { transform: 'translate(0,0)', opacity: 0, offset: 0 },
-      { opacity: 1, offset: .03 },
+      { transform: 'translate(0,0)', opacity: 0, offset: 0, easing: 'cubic-bezier(.65,0,.35,1)' },
+      { opacity: 1, offset: .03, easing: 'cubic-bezier(.65,0,.35,1)' },
       { transform: fim, opacity: 1, offset: .3 },
-      { transform: fim, opacity: 0, offset: .34 },
+      { transform: fim, opacity: 1, offset: .44 },
+      { transform: fim, opacity: 0, offset: .49 },
       { transform: fim, opacity: 0, offset: 1 },
-    ], { duration: 6000, delay: 200, iterations: Infinity, easing: 'linear' });
-    new IntersectionObserver((es) => { if (es[0].isIntersecting) a.play(); else a.pause(); }).observe(trilho);
+    ], { ...tempo, easing: 'linear' });
+    const corridas = [a];
+    const onda = ponto.querySelector('.fluxo__onda');
+    if (onda) corridas.push(onda.animate([
+      { transform: 'scale(1)', opacity: 0, offset: 0 },
+      { transform: 'scale(1)', opacity: 0, offset: .3 },
+      { transform: 'scale(1)', opacity: .9, offset: .305, easing: 'cubic-bezier(.23,1,.32,1)' },
+      { transform: 'scale(3.4)', opacity: 0, offset: .44 },
+      { transform: 'scale(3.4)', opacity: 0, offset: 1 },
+    ], { ...tempo, easing: 'linear' }));
+    new IntersectionObserver((es) => corridas.forEach((c) => (es[0].isIntersecting ? c.play() : c.pause()))).observe(trilho);
   };
   const alvos = [...$$('[data-revela], [data-abre], [data-partir], .rodape')];
   const iniciarEntradas = () => {
@@ -146,7 +160,7 @@
 
   /* ---------- luz que segue o cursor ---------- */
   if (matchMedia('(hover: hover)').matches) {
-    $$('.botao, .card, .pilar').forEach((el) => {
+    $$('.botao').forEach((el) => {
       el.classList.add('tem-luz');
       const l = document.createElement('span');
       l.className = 'luz'; l.setAttribute('aria-hidden', 'true');
@@ -159,6 +173,60 @@
       el.style.setProperty('--mx', `${e.clientX - r.left}px`);
       el.style.setProperty('--my', `${e.clientY - r.top}px`);
     }, { passive: true });
+  }
+
+  /* ---------- campos de luz: o respiro só corre com o bloco na tela, cada um no seu tempo ---------- */
+  const campos = $$('.card:nth-child(2), .card:nth-child(4), .fluxo-area, .fundador__frase, .final__grade, .metodo__topo');
+  if ('IntersectionObserver' in window && !calmo) {
+    const ioCampo = new IntersectionObserver((es) => es.forEach((e) => e.target.classList.toggle('is-vivo', e.isIntersecting)));
+    campos.forEach((el, k) => { el.style.setProperty('--atraso', `${(-k * 1.7).toFixed(1)}s`); ioCampo.observe(el); });
+  }
+
+  /* ---------- borda que acende: segue o cursor no mouse; no toque, corre pela borda de cima ao rolar ---------- */
+  const comBrilho = $$('.card, .pilar, .fundador__cartao, .painel, .fluxo-area, .fundador__frase');
+  const brilhos = new Map();
+  comBrilho.forEach((el) => {
+    el.classList.add('tem-brilho');
+    const b = document.createElement('span');
+    b.className = 'brilho'; b.setAttribute('aria-hidden', 'true');
+    el.appendChild(b); brilhos.set(el, b);
+  });
+  if ('IntersectionObserver' in window && comBrilho.length) {
+    const visiveis = new Set();
+    // as variáveis vão no próprio <span>, não no cartão: assim só ele recalcula a cada quadro
+    const pôrLuz = (b, x, y, o) => { b.style.setProperty('--bx', `${x.toFixed(1)}px`); b.style.setProperty('--by', `${y.toFixed(1)}px`); b.style.setProperty('--bo', o.toFixed(3)); };
+    const cursor = matchMedia('(hover: hover) and (pointer: fine)').matches;
+    let px = -1e4, py = -1e4, pedido = 0;
+    const pintar = () => {
+      pedido = 0;
+      const h = innerHeight;
+      visiveis.forEach((el) => {
+        const r = el.getBoundingClientRect(); const b = brilhos.get(el);
+        if (cursor) {
+          const d = Math.hypot(Math.max(r.left - px, 0, px - r.right), Math.max(r.top - py, 0, py - r.bottom));
+          pôrLuz(b, px - r.left, py - r.top, Math.max(0, 1 - d / 160));
+        } else {
+          // a borda de cima atravessa a tela de baixo para cima; a luz corre da esquerda para a direita e é mais forte no meio
+          const p = Math.min(1, Math.max(0, 1 - r.top / h));
+          pôrLuz(b, r.width * (0.12 + 0.76 * p), -30, Math.sin(Math.PI * p) * 0.9);
+        }
+      });
+    };
+    const pedir = () => { if (!pedido) pedido = requestAnimationFrame(pintar); };
+    const ioB = new IntersectionObserver((es) => es.forEach((e) => {
+      if (e.isIntersecting) visiveis.add(e.target);
+      else { visiveis.delete(e.target); brilhos.get(e.target).style.setProperty('--bo', '0'); }
+    }), { rootMargin: '80px 0px' });
+    comBrilho.forEach((el) => ioB.observe(el));
+    if (cursor) {
+      document.addEventListener('pointermove', (e) => { px = e.clientX; py = e.clientY; pedir(); }, { passive: true });
+      document.documentElement.addEventListener('pointerleave', () => { px = py = -1e4; pedir(); });
+      addEventListener('scroll', pedir, { passive: true });
+    } else if (!calmo) {
+      addEventListener('scroll', pedir, { passive: true });
+      addEventListener('resize', pedir, { passive: true });
+      setTimeout(pedir, 400);
+    }
   }
 
   /* ---------- ilha ---------- */
