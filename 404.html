@@ -1,20 +1,21 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-tema="escuro">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Página não encontrada | Muv.e</title>
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#0B172A">
+<script>try{var t=sessionStorage.getItem("muve-tema");if(t==="claro")document.documentElement.setAttribute("data-tema","claro");}catch(e){}</script>
 <!-- A 404 é servida em qualquer profundidade de endereço: a base aponta para a raiz do site,
      que no GitHub Pages é /muve/ e no domínio próprio é /. -->
 <script>document.write('<base href="' + (/\.github\.io$/.test(location.hostname) ? '/' + location.pathname.split('/')[1] + '/' : '/') + '">');</script>
 <link rel="icon" href="assets/img/favicon.ico" sizes="any">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=20261116b">
 </head>
 <body class="interna">
 <main class="interna__caixa">
-  <a href="./"><img class="interna__logo" src="assets/img/muve-principal.svg" alt="Muv.e, voltar ao início" width="130" height="27"></a>
+  <a href="./"><img class="interna__logo interna__logo--claro" src="assets/img/muve-principal.svg" alt="Muv.e, voltar ao início" width="130" height="27"><img class="interna__logo interna__logo--escuro" src="assets/img/muve-negativa.svg" alt="Muv.e, voltar ao início" width="130" height="27"></a>
   <h1>Esta página não existe.</h1>
   <p>O endereço pode ter mudado ou ter sido digitado com algum erro.</p>
   <a class="botao" href="./">Voltar para o início</a>

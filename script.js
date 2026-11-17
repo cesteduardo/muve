@@ -65,14 +65,16 @@
       if (ult && Math.abs(ult.top - p.offsetTop) < 4) ult.itens.push(p); else linhas.push({ top: p.offsetTop, itens: [p] });
     });
     el.textContent = '';
+    let w = 0; // índice de cada palavra: nas seções elas entram uma depois da outra, como no Warbox TV
     linhas.forEach((ln, n) => {
       const l = document.createElement('span'); l.className = 'l';
       const i = document.createElement('span'); i.className = 'l__i'; i.style.setProperty('--n', n);
-      ln.itens.forEach((p, k) => { i.appendChild(p); if (k < ln.itens.length - 1) i.appendChild(document.createTextNode(' ')); });
+      ln.itens.forEach((p, k) => { p.classList.add('w'); p.style.setProperty('--w', w++); i.appendChild(p); if (k < ln.itens.length - 1) i.appendChild(document.createTextNode(' ')); });
       l.appendChild(i); el.appendChild(l); el.appendChild(document.createTextNode(' '));
     });
     el.classList.add('partido');
     el.dataset.linhas = linhas.length;
+    el.dataset.palavras = w;
   };
   const devolver = (el) => {
     if (el.dataset.original === undefined) return;
@@ -85,7 +87,9 @@
     el.classList.add('is-in');
     if (el.dataset.original !== undefined) {
       // depois de assentar, o título volta a ser texto normal e quebra sozinho ao redimensionar
-      setTimeout(() => devolver(el), 1150 + Number(el.dataset.linhas || 1) * 90 + 200);
+      const porLinha = 1150 + Number(el.dataset.linhas || 1) * 90;
+      const porPalavra = 100 + Number(el.dataset.palavras || 0) * 70 + 800 + Number(getComputedStyle(el).getPropertyValue('--i') || 0) * 70;
+      setTimeout(() => devolver(el), Math.max(porLinha, porPalavra) + 200);
     }
     if (el.matches('[data-fluxo]')) correrFluxo();
   };
@@ -174,6 +178,40 @@
       el.style.setProperty('--my', `${e.clientY - r.top}px`);
     }, { passive: true });
   }
+
+  /* ---------- tema: o interruptor da GR Brands. O novo tema abre em círculo a partir do botão ---------- */
+  const raiz = document.documentElement;
+  const botaoTema = $('#tema');
+  const corBarra = $('meta[name="theme-color"]');
+  const pôrTema = (t, guardar) => {
+    raiz.setAttribute('data-tema', t);
+    if (botaoTema) botaoTema.setAttribute('aria-pressed', String(t === 'escuro'));
+    if (corBarra) corBarra.setAttribute('content', t === 'escuro' ? '#060C18' : '#0B172A');
+    if (guardar) { try { sessionStorage.setItem('muve-tema', t); } catch { /* sem armazenamento */ } }
+  };
+  pôrTema(raiz.getAttribute('data-tema') || 'escuro', false);
+  let trocandoTema = false;
+  const trocarTema = () => pôrTema(raiz.getAttribute('data-tema') === 'escuro' ? 'claro' : 'escuro', true);
+  const revelarTema = () => {
+    if (calmo || !document.startViewTransition || !botaoTema) { trocandoTema = false; trocarTema(); return; }
+    const r = botaoTema.getBoundingClientRect();
+    const x = r.left + r.width / 2, y = r.top + r.height / 2;
+    const longe = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+    raiz.style.setProperty('--wipe-x', `${x.toFixed(1)}px`);
+    raiz.style.setProperty('--wipe-y', `${y.toFixed(1)}px`);
+    raiz.style.setProperty('--wipe-far', `${(longe + 180).toFixed(1)}px`);
+    raiz.classList.add('is-trocando');
+    const solta = () => { raiz.classList.remove('is-trocando'); trocandoTema = false; };
+    let vt;
+    try { vt = document.startViewTransition(trocarTema); } catch { solta(); trocarTema(); return; }
+    vt.finished.then(solta, solta);
+  };
+  if (botaoTema) botaoTema.addEventListener('click', () => {
+    if (trocandoTema) return;
+    trocandoTema = true;
+    // o retorno do toque começa no DOM vivo antes da foto da transição
+    setTimeout(revelarTema, 70);
+  });
 
   /* ---------- campos de luz: o respiro só corre com o bloco na tela, cada um no seu tempo ---------- */
   const campos = $$('.card:nth-child(2), .card:nth-child(4), .fluxo-area, .fundador__frase, .final__grade, .metodo__topo');
