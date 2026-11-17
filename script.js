@@ -269,13 +269,17 @@
 
   /* ---------- seções empilhadas na rolagem (como no Warbox TV) ---------- */
   const pilha = $$('main > section');
-  // vale em qualquer tela, celular inclusive
+  // vale em qualquer tela. No celular e no toque é a versão LEVE: só o sticky nativo, que o navegador
+  // move sozinho. Encolher e escurecer seções de 1 a 3 mil pixels a cada quadro faz o iPhone redesenhar
+  // camadas gigantes, e aí a tela treme e pisca
+  const pilhaLeve = matchMedia('(max-width: 900px), (hover: none)').matches;
   if (pilha.length > 1 && !calmo && CSS.supports('position', 'sticky')) {
     raiz.classList.add('empilhado');
+    raiz.classList.toggle('empilhado--leve', pilhaLeve);
     // um marco de altura zero antes de cada seção guarda onde ela fica na página, já que a seção colada mente a própria posição
     const marcos = new Map();
     pilha.forEach((sec) => {
-      const sombra = document.createElement('span'); sombra.className = 'sombra-pilha'; sombra.setAttribute('aria-hidden', 'true'); sec.appendChild(sombra);
+      if (!pilhaLeve) { const sombra = document.createElement('span'); sombra.className = 'sombra-pilha'; sombra.setAttribute('aria-hidden', 'true'); sec.appendChild(sombra); }
       const m = document.createElement('span'); m.className = 'marco-secao'; m.setAttribute('aria-hidden', 'true'); sec.before(m); marcos.set(sec, m);
     });
     // cola cada seção quando o FIM dela chega ao pé da tela: nada fica escondido.
@@ -286,10 +290,18 @@
     sonda.style.cssText = 'position:fixed;left:0;top:0;width:0;height:100vh;height:100svh;visibility:hidden;pointer-events:none';
     document.body.appendChild(sonda);
     const alturaFixa = () => sonda.offsetHeight || innerHeight;
-    const colar = () => { const h = alturaFixa(); pilha.forEach((sec) => { sec.style.top = `${Math.min(0, h - sec.offsetHeight)}px`; }); };
+    // só regrava o top quando a conta muda de verdade: regravar à toa mexe na seção colada e ela pula
+    const colar = () => {
+      const h = alturaFixa();
+      pilha.forEach((sec) => {
+        const top = `${Math.min(0, Math.round(h - sec.offsetHeight))}px`;
+        if (sec.style.top !== top) sec.style.top = top;
+      });
+    };
     let pedidoPilha = 0;
     const pintarPilha = () => {
       pedidoPilha = 0;
+      if (pilhaLeve) return;
       const vh = innerHeight;
       pilha.forEach((sec, k) => {
         const prox = pilha[k + 1];
