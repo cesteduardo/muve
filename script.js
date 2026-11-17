@@ -267,6 +267,47 @@
     }
   }
 
+  /* ---------- seções empilhadas na rolagem (como no Warbox TV) ---------- */
+  const pilha = $$('main > section');
+  const telaLarga = matchMedia('(min-width: 901px) and (min-height: 600px)');
+  if (pilha.length > 1 && !calmo && telaLarga.matches && CSS.supports('position', 'sticky')) {
+    raiz.classList.add('empilhado');
+    // um marco de altura zero antes de cada seção guarda onde ela fica na página, já que a seção colada mente a própria posição
+    const marcos = new Map();
+    pilha.forEach((sec) => {
+      const sombra = document.createElement('span'); sombra.className = 'sombra-pilha'; sombra.setAttribute('aria-hidden', 'true'); sec.appendChild(sombra);
+      const m = document.createElement('span'); m.className = 'marco-secao'; m.setAttribute('aria-hidden', 'true'); sec.before(m); marcos.set(sec, m);
+    });
+    // cola cada seção quando o FIM dela chega ao pé da tela: nada fica escondido
+    const colar = () => pilha.forEach((sec) => { sec.style.top = `${Math.min(0, innerHeight - sec.offsetHeight)}px`; });
+    let pedidoPilha = 0;
+    const pintarPilha = () => {
+      pedidoPilha = 0;
+      const vh = innerHeight;
+      pilha.forEach((sec, k) => {
+        const prox = pilha[k + 1];
+        const p = prox ? Math.min(1, Math.max(0, (vh - prox.getBoundingClientRect().top) / vh)) : 0;
+        sec.style.setProperty('--cobre', p.toFixed(3));
+      });
+    };
+    const aoRolarPilha = () => { if (!pedidoPilha) pedidoPilha = requestAnimationFrame(pintarPilha); };
+    colar(); pintarPilha();
+    addEventListener('scroll', aoRolarPilha, { passive: true });
+    addEventListener('resize', () => { colar(); pintarPilha(); });
+    if ('ResizeObserver' in window) { const ro = new ResizeObserver(() => { colar(); pintarPilha(); }); pilha.forEach((sec) => ro.observe(sec)); }
+    // âncoras (#metodo, #diagnostico...) vão para o lugar real da seção, mesmo que ela esteja colada lá em cima
+    document.addEventListener('click', (e) => {
+      const a = e.target.closest && e.target.closest('a[href^="#"]');
+      if (!a) return;
+      const alvo = document.getElementById(a.getAttribute('href').slice(1));
+      if (!alvo || !marcos.has(alvo)) return;
+      e.preventDefault();
+      const y = marcos.get(alvo).getBoundingClientRect().top + scrollY;
+      scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+      history.replaceState(null, '', `#${alvo.id}`);
+    });
+  }
+
   /* ---------- ilha ---------- */
   const topo = $('[data-topo]');
   // a pílula tem largura fixa: ao rolar só ganha uma sombra mais funda, sem medir nem animar largura
@@ -278,14 +319,22 @@
   aoRolarIlha();
   addEventListener('scroll', aoRolarIlha, { passive: true });
 
-  // link da seção atual aceso
+  // link da seção atual aceso: a seção da vez é a ÚLTIMA cujo topo já passou do meio da tela
+  // (com as seções empilhadas, as de baixo continuam "na tela", cobertas, e não podem acender junto)
   const linksNav = $$('.ilha__nav a');
-  if (linksNav.length && 'IntersectionObserver' in window) {
-    const ioNav = new IntersectionObserver((es) => es.forEach((e) => {
-      const l = linksNav.find((a) => a.getAttribute('href') === `#${e.target.id}`);
-      if (l) l.classList.toggle('is-aqui', e.isIntersecting);
-    }), { rootMargin: '-45% 0px -50% 0px' });
-    linksNav.forEach((a) => { const s = $(a.getAttribute('href')); if (s) ioNav.observe(s); });
+  const secoesTodas = $$('main > section');
+  if (linksNav.length && secoesTodas.length) {
+    let pedidoNav = 0;
+    const marcarNav = () => {
+      pedidoNav = 0;
+      const meio = innerHeight * 0.45;
+      let atual = null;
+      secoesTodas.forEach((sec) => { if (sec.getBoundingClientRect().top <= meio) atual = sec; });
+      linksNav.forEach((l) => l.classList.toggle('is-aqui', !!atual && l.getAttribute('href') === `#${atual.id}`));
+    };
+    addEventListener('scroll', () => { if (!pedidoNav) pedidoNav = requestAnimationFrame(marcarNav); }, { passive: true });
+    addEventListener('resize', marcarNav);
+    marcarNav();
   }
 
   /* ---------- critérios: a lista é conferida conforme a rolagem passa por ela ---------- */

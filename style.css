@@ -860,7 +860,7 @@ h2 > .tom { display: block; } /* só o span original; na animação cada palavra
 /* ============================================================
    TEMA: interruptor (o mesmo da GR Brands) e o que muda no escuro
    ============================================================ */
-.tema { position: relative; flex: none; display: grid; place-items: center; width: 42px; height: 42px; margin-left: auto; border: 0; border-radius: 50%; padding: 0;
+.tema { position: relative; flex: none; display: grid; place-items: center; width: 42px; height: 42px; margin-left: -6px; border: 0; border-radius: 50%; padding: 0;
   background: transparent; color: var(--tinta); cursor: pointer; touch-action: manipulation; box-shadow: inset 0 0 0 1px var(--divisa);
   transition: box-shadow .25s ease, transform .2s var(--ease), background-color .25s ease; }
 .tema svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
@@ -869,7 +869,8 @@ h2 > .tom { display: block; } /* só o span original; na animação cada palavra
 [data-tema="escuro"] .tema__lua { display: block; }
 @media (hover: hover) { .tema:hover { box-shadow: inset 0 0 0 1px rgba(165, 36, 212, .55), 0 0 18px rgba(165, 36, 212, .35); } }
 .tema:active { transform: scale(.92); }
-.ilha .tema + .botao--ilha { margin-left: 0; }
+/* ordem na ilha: marca, links, botão e, no canto direito, o interruptor */
+.ilha .botao--ilha { margin-left: auto; }
 
 /* troca de tema: o novo abre em círculo a partir do botão (View Transitions), com borda macia */
 ::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
@@ -923,6 +924,8 @@ html.is-trocando *, html.is-trocando *::before, html.is-trocando *::after { tran
 [data-tema="escuro"] .progresso__rotulos li.is-atual::before { background-color: var(--magenta); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), 0 0 0 4px rgba(165, 36, 212, .22), 0 0 18px rgba(165, 36, 212, .6); }
 [data-tema="escuro"] .botao--voltar { box-shadow: inset 0 0 0 1px var(--divisa); }
 [data-tema="escuro"] .credito { background: var(--sup); }
+/* crédito da GR Brands no escuro: símbolo e nome em branco, o ponto continua vermelho */
+[data-tema="escuro"] .credito strong, [data-tema="escuro"] .gr-ico { color: #FFFFFF; }
 [data-tema="escuro"] .rodape { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07), 0 -30px 60px -40px rgba(165, 36, 212, .45); }
 
 /* botões: no escuro o magenta acende ao redor */
@@ -975,3 +978,20 @@ html.is-trocando *, html.is-trocando *::before, html.is-trocando *::after { tran
 }
 @keyframes palavra-entra { to { opacity: 1; transform: none; filter: none; } }
 @keyframes rotulo-digita { to { clip-path: inset(-10% 0 -10% 0); } }
+
+/* ============================================================
+   SEÇÕES EMPILHADAS NA ROLAGEM (o mesmo do Warbox TV)
+   Cada seção rola até o fim, para, e a próxima sobe por cima dela enquanto a
+   anterior recua e escurece. Ligado pelo JS (.empilhado) só em telas largas:
+   no celular as seções são mais altas que a tela e a barra de endereço muda a
+   altura durante a rolagem, então lá fica a rolagem normal.
+   ============================================================ */
+.empilhado main > section {
+  position: sticky;
+  transform-origin: 50% 100%;
+  transform: scale(calc(1 - var(--cobre, 0) * .05));
+}
+.empilhado main > section:not(:first-of-type) { border-radius: 40px 40px 0 0; box-shadow: 0 -1.5px 0 rgba(255, 255, 255, .1), 0 -40px 80px -20px rgba(0, 0, 0, .9); }
+:root[data-tema="claro"].empilhado main > section:not(:first-of-type) { box-shadow: 0 -1px 0 rgba(11, 23, 42, .06), 0 -30px 70px -24px rgba(11, 23, 42, .4); }
+.sombra-pilha { position: absolute; inset: 0; z-index: 60; pointer-events: none; border-radius: inherit; background: #000; opacity: calc(var(--cobre, 0) * .6); }
+.marco-secao { display: block; height: 0; }
